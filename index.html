@@ -1,0 +1,49 @@
+<html>
+  <head>
+    <style>
+      body {
+        padding: 1rem;
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js" integrity="sha512-quHCp3WbBNkwLfYUMd+KwBAgpVukJu5MncuQaWXgCrfgcxCJAq/fo+oqrRKOj+UKEmyMCG3tb8RB63W+EmrOBg==" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <form>
+      <input />
+    </form>
+    <ul>
+    </ul>
+  <script>
+    const socket = new WebSocket(window.location.origin.replace('http', 'ws'));
+    socket.addEventListener('message', (evt)=> {
+      try {
+        const message = JSON.parse(evt.data);
+        ul.innerHTML += `<li>${ message.text } has an id of ${message.id}</li>`;
+
+        console.log(message);
+      }
+      catch(ex){
+      }
+    });
+    const ul = document.querySelector('ul');
+    const form = document.querySelector('form');
+    const input = document.querySelector('input');
+    form.addEventListener('submit', async(ev)=> {
+      ev.preventDefault();
+      const message = { text: input.value };
+      const data = (await axios.post('/api/messages', message)).data;
+      socket.send(JSON.stringify(data));
+    });
+
+    const init = async()=> {
+      const messages = (await axios.get('/api/messages')).data;
+      messages.forEach( message => {
+        ul.innerHTML += `<li>${ message.text } has an id of ${message.id}</li>`;
+      });
+    };
+
+  init();
+
+  </script>
+  </body>
+</html>
